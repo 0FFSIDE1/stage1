@@ -26,13 +26,14 @@ SECRET_KEY = 'django-insecure-if4u$8d+&ina_!#i*8+fzoo04a984_kqbgb-m$=_k&oi#2dm!8
 DEBUG = True
 
 
-ALLOWED_HOSTS = ['stage1.onrender.com', '127.0.0.1']
+ALLOWED_HOSTS = ['stage1-tmlf.onrender.com', '127.0.0.1']
 
-CSRF_TRUSTED_ORIGINS = ['https://stage1.onrender.com']
+CSRF_TRUSTED_ORIGINS = ['https://stage1-tmlf.onrender.com']
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:8000",  
+    "http://127.0.0.1:8000",
+    'https://stage1-tmlf.onrender.com',  
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
