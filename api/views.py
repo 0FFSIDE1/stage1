@@ -32,7 +32,7 @@ def RandomMathFacts(request):
 
         
         
-        if not number or not number.isdigit():
+        if not number or not number.isdigit() or int(number) <= 0:
             return JsonResponse({'number': number, 'error': True}, status=400)
         
         if not number or int(number) <= 0:
