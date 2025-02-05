@@ -1,51 +1,63 @@
-from django.http import JsonResponse
-from django.shortcuts import render
 import requests
-# Create your views here.
+from django.http import JsonResponse
 
 def is_prime(n):
     """Check if a number is prime."""
     if n < 2:
         return False
-    for i in range(2, int(n**0.5) + 1):
-        if n % i == 0:
+    for i in range(2, int(abs(n) ** 0.5) + 1):  # Handle negative numbers correctly
+        if abs(n) % i == 0:
             return False
     return True
 
 def is_perfect(n):
-    """Check if a number is a perfect number (sum of divisors excluding itself = number)."""
-    return n > 1 and sum(i for i in range(1, n) if n % i == 0) == n
+    """Check if a number is a perfect number."""
+    return abs(n) > 1 and sum(i for i in range(1, abs(n)) if abs(n) % i == 0) == abs(n)
 
 def is_armstrong(n):
     """Check if a number is an Armstrong number."""
-    digits = [int(d) for d in str(n)]
+    digits = [int(d) for d in str(abs(n))]
     power = len(digits)
-    return sum(d**power for d in digits) == n
+    return sum(d**power for d in digits) == abs(n)
 
 def digit_sum(n):
-    """Calculate the sum of digits of a number."""
-    return sum(int(d) for d in str(n))
+    str_n = str(n)  # Convert number to string
+    total = 0
+
+    if str_n[0] == '-':  # If negative, take the first digit as negative
+        total += -int(str_n[1])  # First digit after '-' should be negative
+        digits = str_n[2:]  # Get remaining digits
+    else:
+        digits = str_n  # If positive, take all digits normally
+    
+    for digit in digits:
+        total += int(digit)  # Add the remaining digits normally
+    
+    return total
+
 
 def RandomMathFacts(request):
     if request.method == 'GET':
         number = request.GET.get('number', None)
 
-        
-        
-        if not number or not number.isdigit() or int(number) <= 0:
-            return JsonResponse({'number': number, 'error': True}, status=400)
-        
-        if not number or int(number) <= 0:
-            return JsonResponse({'number': number, 'error': True}, status=400)
-        
+        # Validate input
+        if number is None:
+            return JsonResponse({'number': number,'error': True}, status=400)
 
-        number = int(number)
+        # Allow negative numbers but reject alphabets & 0
+        try:
+            number = int(number)  # Convert string to integer
+            if number == 0:
+                return JsonResponse({'number': number,'error': True}, status=400)
+        except ValueError:
+            return JsonResponse({'number': number,'error': True}, status=400)
 
         try:
             # Fetch math fact
             response = requests.get(f'http://numbersapi.com/{number}')
-            response.raise_for_status()  
+            response.raise_for_status()
             fun_fact = response.text
+
             # Compute properties
             properties = []
             if is_armstrong(number):
