@@ -1,70 +1,50 @@
 import math
 import requests
 from django.http import JsonResponse
+from django.views import View
 
-def is_prime(n):
-    if n < 2:
-        return False
-    for i in range(2, int(math.sqrt(n)) + 1):
-        if n % i == 0:
-            return False
-    return True
-
-def is_perfect(n):
-    if n <= 0:
-        return False
-    return sum(i for i in range(1, n) if n % i == 0) == n
-
-def is_armstrong(n):
-    num_str = str(abs(n))  # Convert to string and ignore sign
-    num_digits = len(num_str)
-    return sum(int(digit) ** num_digits for digit in num_str) == abs(n)
-
-def digit_sum(n):
-    return sum(int(digit) for digit in str(abs(n)))  # Ignore sign
-
-def RandomMathFacts(request):
-    if request.method == 'GET':
-        number = request.GET.get('number', None)
-
-        # Validate input
+class NumberView(View):
+    def get(self, request):
+        number = request.GET.get("number")
         if number is None or not number.lstrip("-").isdigit():
             return JsonResponse({"number": number, "error": True}, status=400)
-
-        # Allow negative numbers but reject alphabets & 0
+        number = int(number)
+        response_data = {
+            "number": number,
+            "is_prime": self.is_prime(number),
+            "is_perfect": self.is_perfect(number),
+            "properties": self.get_properties(number),
+            "digit_sum": self.digit_sum(number),
+            "fun_fact": self.get_fun_fact(number),
+        }
+        return JsonResponse(response_data, status=200)
+    def is_prime(self, n):
+        if n < 2:
+            return False
+        for i in range(2, int(math.sqrt(n)) + 1):
+            if n % i == 0:
+                return False
+        return True
+    def is_perfect(self, n):
+        if n <= 0:
+            return False
+        return sum(i for i in range(1, n) if n % i == 0) == n
+    def is_armstrong(self, n):
+        num_str = str(abs(n)) 
+        num_digits = len(num_str)
+        return sum(int(digit) ** num_digits for digit in num_str) == abs(n)
+    def get_properties(self, n):
+        properties = ["even" if n % 2 == 0 else "odd"]
+        if self.is_armstrong(n):
+            properties.insert(0, "armstrong")
+        return properties
+    def digit_sum(self, n):
+        return sum(int(digit) for digit in str(abs(n)))
+    def get_fun_fact(self, n):
         try:
-            number = int(number)  # Convert string to integer
-            if number == 0:
-                return JsonResponse({'number': number,'error': True}, status=400)
-        except ValueError:
-            return JsonResponse({'number': number,'error': True}, status=400)
-
-        try:
-            # Fetch math fact
-            response = requests.get(f'http://numbersapi.com/{number}')
-            response.raise_for_status()
-            fun_fact = response.text
-
-            # Compute properties
-            properties = []
-            if is_armstrong(number):
-                properties.append("armstrong")
-            if number % 2 == 1:
-                properties.append("odd")
-            else:
-                properties.append("even")
-
-            context = {
-                "number": number,
-                "is_prime": is_prime(number),
-                "is_perfect": is_perfect(number),
-                "properties": properties,
-                "digit_sum": digit_sum(number),
-                "fun_fact": fun_fact
-            }
-            return JsonResponse(context, status=200)
-
-        except requests.exceptions.RequestException as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-
-    return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
+            response = requests.get(f"http://numbersapi.com/{n}/math", timeout=5)
+            if response.status_code == 200:
+                return response.text
+        except requests.exceptions.RequestException:
+            pass
+        return "No fun fact available."

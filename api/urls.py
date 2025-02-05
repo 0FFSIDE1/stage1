@@ -1,7 +1,7 @@
 
 from django.urls import path
-from api.views import RandomMathFacts
+from api.views import NumberView
 
 urlpatterns = [
-    path('api/classify-number', RandomMathFacts, name='random_math_facts'),
+    path('api/classify-number', NumberView.as_view(), name='random_math_facts'),
 ]
