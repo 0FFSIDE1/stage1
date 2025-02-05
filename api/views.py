@@ -21,20 +21,12 @@ def is_armstrong(n):
     return sum(d**power for d in digits) == abs(n)
 
 def digit_sum(n):
-    str_n = str(n)  # Convert number to string
-    total = 0
-
-    if str_n[0] == '-':  # If negative, take the first digit as negative
-        total += -int(str_n[1])  # First digit after '-' should be negative
-        digits = str_n[2:]  # Get remaining digits
-    else:
-        digits = str_n  # If positive, take all digits normally
-    
-    for digit in digits:
-        total += int(digit)  # Add the remaining digits normally
+    n = abs(n)  # Work with absolute value
+    total = 0  # Initialize total sum
+    for digit in str(n):  # Iterate through each digit
+        total += int(digit)  # Add it manually
     
     return total
-
 
 def RandomMathFacts(request):
     if request.method == 'GET':
